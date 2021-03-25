@@ -1,9 +1,5 @@
 <!-- PROJECT SHIELDS -->
 <!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
@@ -18,7 +14,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/youngb1801/Portfolio/Airline_Safety">
+  <a href="https://github.com/youngb1801/Portfolio/tree/main/Airline_Safety">
     <img src="images/flyingstatistics.jpg" alt="Logo" width="120" height="100">
   </a>
 
@@ -27,14 +23,14 @@
   <p align="center">
     Is airline travel safer than automobile?
     <br />
-    <a href="https://github.com/youngb1801/Portfolio/Airline_Safety"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/youngb1801/Portfolio/tree/main/Airline_Safety"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/youngb1801/Portfolio/Airline_Safety">View Demo</a>
+    <a href="https://github.com/youngb1801/Portfolio/tree/main/Airline_Safety">View Demo</a>
     ·
-    <a href="https://github.com/youngb1801/Portfolio/Airline_Safety/issues">Report Bug</a>
+    <a href="https://github.com/youngb1801/Portfolio/issues">Report Bug</a>
     ·
-    <a href="https://github.com/youngb1801/Portfolio/Airline_Safety/issues">Request Feature</a>
+    <a href="https://github.com/youngb1801/Portfolio/issues">Request Feature</a>
   </p>
 </p>
 
@@ -97,7 +93,7 @@ The files can be viewed using:
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/youngb1801/Portfolio/Airline_Safety.git
+   git clone https://github.com/youngb1801/Portfolio.git
    ```
 2. Install your favorite data visualization software
 * Tableau
@@ -110,14 +106,14 @@ The files can be viewed using:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-This type of project would be used to increase awareness and knowledge on a particular topic by telling the story uncovered from the data.
+This project would be used to increase awareness and knowledge on a particular topic by telling the story uncovered from the data.
 
 
 
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/youngb1801/Portfolio/Airline_Safety/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/youngb1801/Portfolio/issues) for a list of proposed features (and known issues).
 
 
 
@@ -146,7 +142,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Bret Young - bayoung1801@gmail.com
 
-Project Link: [https://github.com/youngb1801/Portfolio/Airline_Safety](https://github.com/youngb1801/Portfolio/Airline_Safety)
+Project Link: [https://github.com/youngb1801/Portfolio/tree/main/Airline_Safety](https://github.com/youngb1801/Portfolio/tree/main/Airline_Safety)
 
 
 
@@ -161,15 +157,15 @@ Project Link: [https://github.com/youngb1801/Portfolio/Airline_Safety](https://g
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/youngb1801/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/youngb1801/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/youngb1801/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/youngb1801/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/youngb1801/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/youngb1801/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/youngb1801/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/youngb1801/repo/issues
-[license-shield]: https://img.shields.io/github/license/youngb1801/repo.svg?style=for-the-badge
-[license-url]: https://github.com/youngb1801/repo/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/youngb1801/Portfolio.svg?style=for-the-badge
+[contributors-url]: https://github.com/youngb1801/Portfolio/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/youngb1801/Portfolio.svg?style=for-the-badge
+[forks-url]: https://github.com/youngb1801/Portfolio/network/members
+[stars-shield]: https://img.shields.io/github/stars/youngb1801/Portfolio.svg?style=for-the-badge
+[stars-url]: https://github.com/youngb1801/Portfolio/stargazers
+[issues-shield]: https://img.shields.io/github/issues/youngb1801/Portfolio.svg?style=for-the-badge
+[issues-url]: https://github.com/youngb1801/Portfolio/issues
+[license-shield]: https://img.shields.io/github/license/youngb1801/Portfolio.svg?style=for-the-badge
+[license-url]: https://github.com/youngb1801/Portfolio/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/bret-young-4b5b0ba9/
