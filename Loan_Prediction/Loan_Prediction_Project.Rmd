@@ -1,0 +1,601 @@
+---
+title: "Young_DSC 630_Final Project"
+author: "Bret Young"
+date: "6/8/2020"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
+library(reticulate)
+use_python("/usr/local/bin/python3", required = T)
+library(methods)
+library(ggplot2)
+library(e1071)
+library(plyr)
+```
+
+## Loading Data
+
+```{r}
+# read in data file
+d = read.csv("madfhan_train.csv")
+```
+
+## Data Understanding
+
+```{r}
+# inspect the structure of the data
+str(d)
+```
+
+```{r}
+# get summary statistics for each variable in the data
+summary(d)
+```
+
+```{r}
+library(Hmisc)
+Hmisc::describe(d)
+```
+
+```{r}
+# iterate thgough the columns of the data and provide descriptive statistics and either histogram or bar graph based on class of variable
+library(methods)
+library(ggplot2)
+for (i in colnames(d)) {
+    if (class(d[[i]]) == "numeric" || class(d[[i]]) == "integer") {
+        print(colnames(d[i]))
+        print(summary(d[[i]]))
+        print(skewness(d[[i]], na.rm = TRUE))
+        print(kurtosis(d[[i]], na.rm = TRUE))
+        print(qplot(x = d[[i]], geom = "histogram", xlab = colnames(d[i])))
+    }
+    else{
+        print(colnames(d[i]))
+        print(summary(d[[i]]))
+        print(qplot(x = d[[i]], geom = "bar", xlab = colnames(d[i])))
+    }
+}
+```
+
+Replace missing values
+
+```{r}
+# Return the column names containing missing observations
+list_na <- colnames(d)[ apply(d, 2, anyNA) ]
+list_na
+```
+
+```{r}
+d_missing <- apply(d[,colnames(d) %in% list_na],
+      2,
+      mean,
+      na.rm =  TRUE)
+d_missing
+```
+
+Credit_History is a categorical variable and will not be replaced with the mean, but LoanAmount and Loan_Amount_Term will.
+
+```{r}
+# Load library needed
+library(dplyr) 
+
+# Create a new variable with the mean and median
+d_replace <- d %>%
+   mutate(LoanAmount  = ifelse(is.na(LoanAmount), d_missing[1], LoanAmount),
+   Loan_Amount_Term = ifelse(is.na(Loan_Amount_Term), d_missing[2], Loan_Amount_Term),
+   Credit_History = ifelse(is.na(Credit_History), 1, Credit_History))
+
+# Remove blank factor values and replace with most frequent values
+d_replace$Gender = mapvalues(d_replace$Gender, from = "", to = "Male")
+d_replace$Married = mapvalues(d_replace$Married, from = "", to = "Yes")
+d_replace$Dependents = mapvalues(d_replace$Dependents, from = "", to = "0")
+d_replace$Self_Employed = mapvalues(d_replace$Self_Employed, from = "", to = "No")
+
+# Remove loan ID as it will not be used in the prediction of the model
+d_replace = select(d_replace, -Loan_ID)
+
+# Remove loan status as it is information addaed after the assesment
+d_replace = select(d_replace, -Loan_Status)
+
+str(d_replace)
+```
+
+```{r}
+# iterate thgough the columns of the data and provide descriptive statistics and either histogram or bar graph based on class of variable
+for (i in colnames(d_replace)) {
+    if (class(d_replace[[i]]) == "numeric" || class(d_replace[[i]]) == "integer") {
+        print(qplot(x = d_replace[[i]], geom = "histogram", xlab = colnames(d_replace[i])))
+    }
+    else{
+        print(qplot(x = d_replace[[i]], geom = "bar", xlab = colnames(d_replace[i])))
+    }
+}
+```
+
+```{r}
+Hmisc::describe(d_replace)
+```
+
+Before I move on, there are some categorical variables that need to be converted to dummy variables so that they can be used in my machine learning model later.
+
+```{r}
+# load library needed for creating dummy variables
+library(caret)
+
+# creat dummy variables for all categorical variables in the data
+dmy <- dummyVars(" ~ .", data = d_replace, fullRank = T)
+d_replaced_transformed <- data.frame(predict(dmy, newdata = d_replace))
+
+str(d_replaced_transformed)
+```
+
+```{r}
+Hmisc::describe(d_replaced_transformed)
+```
+
+```{r}
+# scale the dataset
+d_replaced_transformed = as.data.frame(scale(d_replaced_transformed))
+```
+
+```{r}
+# look ar the correlation betweem continuous variables
+library(PerformanceAnalytics)
+chart.Correlation(d_replaced_transformed, histogram = FALSE, pch = 19)
+```
+
+```{r}
+# load library for a different correlation matrix
+library(ggcorrplot)
+
+ggcorrplot(cor(d_replaced_transformed), p.mat = cor_pmat(d_replaced_transformed), insig = 'blank', hc.order=TRUE) +     theme(axis.text.x = element_text(size = 7, angle = 90, margin=margin(-2,0,0,0)),
+        axis.text.y = element_text(size = 7, margin=margin(0,-2,0,0)),
+        panel.grid.minor = element_line(size=10)) + 
+  geom_tile(fill="white") +
+  geom_tile(height=0.8, width=0.8)
+```
+
+Variable Plots:
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = Property_Area.Urban, y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Property_Area.Urban", y = "LoanAmount")
+```
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = Dependents.1, y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Dependents = 1", y = "LoanAmount")
+```
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = Dependents.2, y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Dependents = 2", y = "LoanAmount")
+```
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = Dependents.3., y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Dependents = 3", y = "LoanAmount")
+```
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = Education.Not.Graduate, y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Graduate Education", y = "LoanAmount")
+```
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = Self_Employed.Yes, y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Self Employed", y = "LoanAmount")
+```
+
+```{r}
+# Review multivariable relationships for variables and the target
+ggplot(data = d_replaced_transformed, aes(x = CoapplicantIncome, y = LoanAmount)) +
+    geom_count() +
+    labs(x = "Coapplicant Income", y = "LoanAmount")
+```
+
+Feature Selection:
+
+```{r}
+# Fit a regression model
+fit_lm = lm(LoanAmount~.,data = d_replaced_transformed)
+
+# generate summary
+summary(fit_lm)
+```
+
+Here we can see there are a few variables that are statistically significant based on the p-values in a logistic regression model.  I will be removing anything with a p-value less than 0.05 and run the new model.
+
+```{r}
+# variable importance
+varImp(fit_lm)
+```
+
+Here we can see how the variables are ranked based on their importance values.  Having the credit history available has the greatest importance to this model.
+
+
+```{r}
+# Fit a regression model
+fit_lm = lm(LoanAmount~ Married.No + Education.Not.Graduate + ApplicantIncome + CoapplicantIncome + Loan_Amount_Term,data = d_replaced_transformed)
+
+# generate summary
+summary(fit_lm)
+```
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+```
+
+
+```{python}
+X = r.d_replaced_transformed.iloc[:, np.r_[1, 5, 7:9, 10]].values
+y = r.d_replaced_transformed.iloc[:, 9].values
+```
+
+```{python}
+# used to assign index values to data
+indices = range(len(X))
+```
+
+```{python}
+# Splitting the dataset into the Training set and Test set with inddex to original dataset
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test, index_train, index_test = train_test_split(X, y, indices, test_size = 0.2, random_state = 0)
+```
+
+### Multiple Linear Regression Model
+
+```{python}
+# Fitting Multiple Linear Regression to the Training set
+from sklearn.linear_model import LinearRegression
+regressor_lm = LinearRegression()
+regressor_lm.fit(X_train, y_train)
+```
+
+```{python}
+# Predicting the Test set results
+y_pred_lm = regressor_lm.predict(X_test)
+```
+
+```{python}
+# obtain R-squared values
+r2_lm = regressor_lm.score(X_test, y_test)
+print(r2_lm)
+```
+
+The score here is not great indicating the data may not be linear.
+
+```{python}
+# Load library for MAE
+from sklearn.metrics import mean_absolute_error
+
+# obtain MAE for model
+MAE_lm = mean_absolute_error(y_pred_lm, y_test)
+print(MAE_lm)
+```
+
+### Decision Tree Model
+
+```{python}
+# load valication curve modual
+from yellowbrick.model_selection import ValidationCurve
+
+# load module for decision tree regression
+from sklearn.tree import DecisionTreeRegressor
+
+viz_dt = ValidationCurve(
+    DecisionTreeRegressor(), param_name="max_depth",
+    param_range=np.arange(1, 11), cv=10, scoring="r2"
+)
+
+# Fit and show the visualizer
+viz_dt.fit(X_train, y_train)
+viz_dt.show()
+```
+
+
+```{python}
+# Fitting Decision Tree Regression to the dataset
+regressor_dt = DecisionTreeRegressor(max_depth = 3, random_state = 0)
+regressor_dt.fit(X, y)
+```
+
+```{python}
+# predicting y values from test data
+y_pred_dt = regressor_dt.predict(X_test)
+```
+
+```{python}
+# obtain R-squared value
+r2_dt = regressor_dt.score(X_test, y_test)
+print(r2_dt)
+```
+
+```{python}
+#obtain MAE
+MAE_dt = mean_absolute_error(y_pred_dt, y_test)
+print(MAE_dt)
+```
+
+### Random Forrest Model
+
+```{python}
+# loading module for Random Forrest Regression
+from sklearn.ensemble import RandomForestRegressor
+
+viz_rf = ValidationCurve(
+    RandomForestRegressor(), param_name="n_estimators",
+    param_range=np.arange(1, 20), cv=10, scoring="r2"
+)
+
+# Fit and show the visualizer
+viz_rf.fit(X_train, y_train)
+viz_rf.show()
+```
+
+```{python}
+# Fitting Random Forest Regression to the dataset
+regressor_rf = RandomForestRegressor(n_estimators = 7, random_state = 0)
+regressor_rf.fit(X, y)
+```
+
+```{python}
+# Predict y values from test data
+y_pred_rf = regressor_rf.predict(X_test)
+```
+
+```{python}
+# obtian R-squared value
+r2_rf = regressor_rf.score(X_test, y_test)
+print(r2_rf)
+```
+
+```{python}
+#obtain MAE value
+MAE_rf = mean_absolute_error(y_pred_rf, y_test)
+print(MAE_rf)
+```
+
+### K-Nearest Neighbors Regression
+
+```{python}
+# Import module for KNN Regressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_squared_error 
+from math import sqrt
+
+# Fitt multiple k-values in KNN Regressor to the dataset to find optimal k
+rmse_val = []
+for K in range(20):
+  K = K+1
+  regressor_knn = KNeighborsRegressor(n_neighbors = K)
+  #fitting the model for each K-value
+  regressor_knn.fit(X_train, y_train)
+  # predict y values
+  pred = regressor_knn.predict(X_test) 
+  #calculate error root mean squared error
+  error = sqrt(mean_squared_error(y_test, pred))
+  #store rmse values
+  rmse_val.append(error)
+```
+
+```{python}
+#import package
+import matplotlib.pyplot as plt
+
+#plotting the rmse values against k values with elbow curve
+curve = pd.DataFrame(rmse_val) 
+curve.plot()
+plt.xlabel('K-value')
+plt.ylabel('RMSE')
+plt.title('Elbow Curve')
+```
+
+```{python}
+#fitting the model for each K-value
+regressor_knn = KNeighborsRegressor(n_neighbors = 6)
+regressor_knn.fit(X_train, y_train)
+```
+
+```{python}
+# predict y values
+y_pred_knn = regressor_knn.predict(X_test) 
+```
+
+```{python}
+# obtian R-squared value
+r2_knn = regressor_rf.score(X_test, y_test)
+print(r2_knn)
+```
+
+```{python}
+#obtain MAE value
+MAE_knn = mean_absolute_error(y_pred_knn, y_test)
+print(MAE_knn)
+```
+
+### Gradient Boosting Regression
+
+```{python}
+#import module for Gradient Boosting Regression
+from sklearn import ensemble
+
+# Setting parameters for gradient boostin model
+params = {'n_estimators': 5000,
+          'max_depth': 4,
+          'min_samples_split': 5,
+          'learning_rate': 0.01,
+          'loss': 'ls'}
+          
+# Fitting Gradient Boosting Regression to the dataset        
+regressor_gbr = ensemble.GradientBoostingRegressor(**params)
+regressor_gbr.fit(X_train, y_train)
+```
+
+```{python}
+# predict y values from test data
+y_pred_gbr = regressor_gbr.predict(X_test)
+```
+
+```{python}
+# Obtain R-squared value
+r2_gbr = regressor_gbr.score(X_test, y_test)
+print(r2_gbr)
+```
+
+```{python}
+# Obtain MAE value
+MAE_gbr = mean_absolute_error(y_pred_gbr, y_test)
+print(MAE_gbr)
+```
+
+### Support Vector Regression
+
+```{python}
+# load required package
+from sklearn.svm import SVR
+
+# Fitting SVR to the dataset
+regressor_svr = SVR(kernel = 'rbf')
+regressor_svr.fit(X_train, y_train)
+```
+
+```{python}
+# predicting y
+y_pred_svr = regressor_svr.predict(X_test)
+```
+
+```{python}
+# Obtain R-squared value
+r2_svr = regressor_svr.score(X_test, y_test)
+print(r2_svr)
+```
+
+```{python}
+# Obtain MAE value
+MAE_svr = mean_absolute_error(y_pred_svr, y_test)
+print(MAE_svr)
+```
+
+### Ada-boost Regression
+
+```{python}
+# load required package
+from sklearn.ensemble import AdaBoostRegressor
+
+# Fitting Ada-boost regression to the dataset
+regressor_abr = AdaBoostRegressor(random_state=0, n_estimators=500)
+regressor_abr.fit(X_train, y_train)
+```
+
+```{python}
+# predicting y
+y_pred_abr = regressor_abr.predict(X_test)
+```
+
+```{python}
+# Obtain R-squared value
+r2_abr = regressor_abr.score(X_test, y_test)
+print(r2_abr)
+```
+
+```{python}
+# Obtain MAE value
+MAE_abr = mean_absolute_error(y_pred_abr, y_test)
+print(MAE_abr)
+```
+
+### Comparing Models
+
+```{python}
+# set up the figure size
+plt.rcParams['figure.figsize'] = (20, 20)
+
+# make subplots
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 2, sharey=True)
+
+# plot y_pred values compared to actual values for each model
+ax1[0].scatter(y_test, y_pred_lm)
+ax1[1].scatter(y_test, y_pred_dt)
+ax2[0].scatter(y_test, y_pred_rf)
+ax2[1].scatter(y_test, y_pred_knn)
+ax3[0].scatter(y_test, y_pred_gbr)
+ax3[1].scatter(y_test, y_pred_svr)
+ax4[0].scatter(y_test, y_pred_abr)
+ax1[0].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax2[0].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax3[0].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax4[0].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax1[1].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax2[1].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax3[1].plot( [-1, 0, 1, 2, 3, 4],[-1, 0, 1, 2, 3, 4] )
+ax4[0].set_xlabel('Actual Value')
+ax4[1].set_xlabel('Actual Value')
+ax1[0].set_ylabel('Predicted Value')
+ax2[0].set_ylabel('Predicted Value')
+ax3[0].set_ylabel('Predicted Value')
+ax1[0].set_title('Linear Model')
+ax1[1].set_title('Decision Tree - Max_depth = 3')
+ax2[0].set_title('Random Forrest - Number of Trees = 7')
+ax2[1].set_title('KNN')
+ax3[0].set_title('Gradient Boosting')
+ax3[1].set_title('Support Vector Regression')
+ax4[0].set_title('Ada-Boost Regression')
+ax1[0].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_lm, MAE_lm), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+ax1[1].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_dt, MAE_dt), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+ax2[0].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_rf, MAE_rf), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+ax2[1].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_knn, MAE_knn), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+ax3[0].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_gbr, MAE_gbr), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+ax3[1].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_svr, MAE_svr), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+ax4[0].text(-1, 3.7, 'R-squared: {0:.3f}\nMAE: {1:.3f}'.format(r2_abr, MAE_abr), bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+plt.show()
+```
+
+
+```{python}
+# Make list for plotting model comparison
+MAE_list = [MAE_lm, MAE_dt, MAE_rf, MAE_knn, MAE_gbr, MAE_svr, MAE_abr]
+r2_list = [r2_lm, r2_dt, r2_rf, r2_knn, r2_gbr, r2_svr, r2_abr]
+Model_list = ['Linear Regression', 'Decision Tree', 'Random Forret', 'K-Nearest Neighbor', 'Gradient Boosting Regression', 'Support Vector Regression', 'Ada-Boost Regression']
+```
+
+
+```{python}
+# set up the figure size
+plt.rcParams['figure.figsize'] = (20, 7)
+
+# make subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+
+# plot MAE and R-suqared values
+ax1.scatter(x = MAE_list, y = Model_list)
+ax1.set_title('Model Comparison with Mean Average Error')
+ax1.set_xlabel('Mean Average Error')
+ax1.set_ylabel('Model')
+ax2.scatter(x = r2_list, y = Model_list)
+ax2.set_title('Model Comparison with R-squared')
+ax2.set_xlabel('R-squared')
+plt.show()
+```
+
+Here we can see that the decision tree model performs the best at predicting the loan amount value, but it seems like it is overfit.  Therfore the random forrest model will be the model selected for the unlabeled dataset.
