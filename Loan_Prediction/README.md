@@ -121,7 +121,7 @@ This is an example of how to list things you need to use the software and how to
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-This project would be used to increase awareness and knowledge on a particular topic by telling the story uncovered from the data.
+This project would be used to predict the loan amount for online applicants. The result would be used to determine if the loan is of high risk to allocate additional resources to review the application. Deploying the model could be conducted within the online application process as soon as the application is submitted or in a batch process method depending on the needs of the loan provider. Retraining of the model would need to be conducted on a regular basis to ensure accurate predictions.
 
 
 
