@@ -1,2 +1,2 @@
-# Sentiment_Analysis
-Determine if tweets are positive or negative
+# Disease Condition Classification
+Determine condition from drug reviews
