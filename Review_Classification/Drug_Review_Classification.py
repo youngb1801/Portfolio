@@ -160,6 +160,9 @@ ax1.plot(epochs, val_loss, 'b', label = 'Validation Loss')
 ax1.set_title('Training and Validation Loss')
 ax1.legend()
 
+# load saved model
+model = tf.keras.models.load_model('drug_review_rnn_50.h5')
+
 # model performance
 predictions = model.predict(x_test)
 
@@ -188,3 +191,8 @@ def plot_cm(y_true, y_pred, figsize = (10,10)):
     sns.heatmap(cm, cmap= "YlGnBu", annot = annot, fmt = '', ax = ax)
 
 plot_cm(y_test.argmax(axis = 1), predictions.argmax(axis = 1), figsize = (30,30))
+
+# model accuracy
+accuracy_metric = accuracy_score(y_test, predictions)
+
+print('Accuracy: ', accuracy_metric)
