@@ -67,8 +67,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
 The goal of this project was to locate multiple data sources to determine if airline travel is a safer mode of transportation despite and increase in fatal incidents. A dashboard, blog post, infographic and executive summary were all created using Tableau visualizations to present the findings to various audiences.
 
 The hypothesis, is air travel safer than automobile?, was proven true based on the data.
@@ -84,6 +82,19 @@ The hypothesis, is air travel safer than automobile?, was proven true based on t
 To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
+
+The data for this project can be found at the following links:
+  1. [airline-safety.csv](https://github.com/fivethirtyeight/data/tree/master/airline-safety)
+
+  2. [Airplane Fatalities by Year 1918-2019.csv](http://www.baaa-acro.com/statistics/death-rate-per-year)
+
+  3. [Airplane_Crashes_and_Fatalities_Since_1908.csv](https://data.world/youngb1801/air01/workspace/file?agentid=hhaveliw&datasetid=airplane-crashes-1908-2009&filename=Airplane_Crashes_and_Fatalities_Since_1908.csv)
+
+  4. [Cars_94-18.csv](https://www-fars.nhtsa.dot.gov/Trends/TrendsGeneral.aspx)
+
+  5. [Financials.pdf](https://www.airlines.org/dataset/annual-results-u-s-passenger-airlines/#)
+
+  6. [Crude Oil Prices](https://www.kaggle.com/mabusalah/brent-oil-prices)
 
 The files can be viewed using:
 * Any pdf reader like [Adobe Acrobat Reader DC](https://get.adobe.com/reader/)

@@ -67,8 +67,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
 The goal of this project is to predict loan amounts from online applications to identify high risk loans. This will allow the loan company to distribute resources appropriately.
 
 
@@ -76,7 +74,6 @@ The goal of this project is to predict loan amounts from online applications to 
 
 * [RStudio](https://www.rstudio.com)
 * [Python 3](https://www.python.org/download/releases/3.0/)
-* [SciKitLearn](https://scikit-learn.org/stable/)
 
 
 
@@ -87,12 +84,12 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them if you ave pip installed.
+This is an example of how to list things you need to use the software and how to install them if you have pip installed.
 * pip
   ```sh
   pip install pandas
   ```
-
+* [SciKitLearn](https://scikit-learn.org/stable/)
 
 ### Installation
 
